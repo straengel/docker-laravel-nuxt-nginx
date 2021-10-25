@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile.dev
+    container_name: dln-laravel
+    restart: unless-stopped
+    working_dir: /var/www/laravel
+    volumes:
+      - ./laravel:/var/www/laravel
+    depends_on:
+      - maria_db
+    networks:
+      - docker-laravel-nuxt
+
+  nuxt:
+    build:
+      context: ./nuxt
+      dockerfile: Dockerfile.dev
+    stdin_open: true
+    tty: true
+    volumes:
+      - './nuxt:/app'
+      - './app/node_modules/'
+    command: [ "npm", "run", "dev" ]
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - '3000:3000'
+    networks:
+      - docker-laravel-nuxt
+
+  maria_db:
+    image: mariadb:10
+    platform: linux/x86_64
+    container_name: dln-maria-db
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: admin
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./laravel/storage/dbdata:/var/lib/mysql
+    networks:
+      - docker-laravel-nuxt
+
+  nginx:
+    image: nginx:1.20-alpine
+    container_name: dln-nginx
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - laravel
+      - nuxt
+    ports:
+      - "80:80"
+      - "8081:81"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/nginx.conf.test:/etc/nginx/conf.d/nginx.conf
+    networks:
+      - docker-laravel-nuxt
+
+networks:
+  docker-laravel-nuxt:
+    driver: bridge

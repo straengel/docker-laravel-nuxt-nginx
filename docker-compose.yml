@@ -1,6 +1,7 @@
-version: '3.1'
+version: '3'
 
 services:
+
   nuxt:
     build:
       context: ./nuxt
@@ -22,7 +23,7 @@ services:
     container_name: dln-laravel
     restart: unless-stopped
     volumes:
-      - ./laravel:/app
+      - ./laravel:/var/www/laravel
     depends_on:
       - maria_db
     networks:
@@ -53,6 +54,7 @@ services:
     depends_on:
       - laravel
       - maria_db
+      - nuxt
     ports:
       - "80:80"
       - "443:443"

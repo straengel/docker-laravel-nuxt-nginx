@@ -2,6 +2,9 @@
  
 Заметки
 --
+- С поддоменами полная беда, пока не знаю как решить, http://project.local/api/hi http://project.local работают
+- https://github.com/nevadskiy/laravel-nuxt-docker
+- https://titanwolf.org/Network/Articles/Article?AID=a4ef5ad1-fdb4-47ca-8414-3766a6f4e224 - как еще можно организовать структуру
 - для alpine необходимо использовать apk update (вместое apt-get update) && apk add (вместо apt-get install)
   - разница между ports и expose
 
