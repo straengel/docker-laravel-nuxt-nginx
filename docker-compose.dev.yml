@@ -1,0 +1,30 @@
+version: '3.1'
+
+services:
+  nuxt:
+    build:
+      context: ./nuxt
+      dockerfile: Dockerfile.dev
+    stdin_open: true
+    tty: true
+    volumes:
+      - './nuxt:/app'
+      - './app/node_modules/'
+    command: [ "npm", "run", "dev" ]
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    volumes:
+      - ./laravel:/app
+
+  nginx:
+    image: nginx:1.20-alpine
+    container_name: dln-nginx
+    volumes:
+      - ./laravel:/app
+      - ./nginx/nginx.conf.dev:/etc/nginx/conf.d/nginx.conf

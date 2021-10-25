@@ -1,0 +1,7 @@
+node_modules
+.idea
+vandor
+test
+backups
+/laravel/backups/
+/laravel/.env

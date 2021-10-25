@@ -1,0 +1,67 @@
+version: '3.1'
+
+services:
+  nuxt:
+    build:
+      context: ./nuxt
+      dockerfile: Dockerfile
+    container_name: dln-nuxt
+    command: npm run start
+    restart: unless-stopped
+#    stdin_open: true
+#    tty: true
+    ports:
+      - '3000:3000'
+    networks:
+      - docker-laravel-nuxt
+
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile
+    container_name: dln-laravel
+    restart: unless-stopped
+    volumes:
+      - ./laravel:/app
+    depends_on:
+      - maria_db
+    networks:
+      - docker-laravel-nuxt
+
+  maria_db:
+    image: mariadb:10
+    platform: linux/x86_64
+    container_name: dln-maria-db
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: admin
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./laravel/storage/dbdata:/var/lib/mysql
+    networks:
+      - docker-laravel-nuxt
+
+  nginx:
+    image: nginx:1.20-alpine
+    container_name: dln-nginx
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - laravel
+      - maria_db
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
+    networks:
+      - docker-laravel-nuxt
+
+networks:
+  docker-laravel-nuxt:
+    driver: bridge
