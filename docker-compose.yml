@@ -11,6 +11,9 @@ services:
     restart: unless-stopped
 #    stdin_open: true
 #    tty: true
+#    volumes:
+#      - './nuxt:/app'
+#      - './app/node_modules/'
     ports:
       - '3000:3000'
     networks:
@@ -59,8 +62,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./:/var/www
-      - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
+#      - ./:/var/www
+      - ./settings/nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
     networks:
       - docker-laravel-nuxt
 

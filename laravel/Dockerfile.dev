@@ -1,7 +1,7 @@
 FROM php:8-fpm
 
 # Copy composer.lock and composer.json
-COPY composer.lock composer.json /var/www/laravel/
+#COPY composer.lock composer.json /var/www/laravel/
 
 # Set working directory
 WORKDIR /var/www/laravel
@@ -32,6 +32,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Copy existing application directory contents
 COPY . /var/www/laravel
+RUN composer install
 
 EXPOSE 9000
 CMD ["php-fpm"]

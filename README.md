@@ -1,12 +1,47 @@
 # docker-laravel-nuxt
  
+Команды
+--
+
+ - docker-compose up --build (сборка проекта для продакшена)
+ - docker-compose logs название_контейнера (посмотреть логи запущеного контейнера)
+ - docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build (запускаем режим разработки)
+ - docker run --rm -v $(pwd):/app composer install (установка vendora без композера, не забыть перейти в папочку laravel)
+ - docker-compose exec name_services (позволяет запускать конкретные команды в контейнерах) bash (запускается терминал bash)
+
+
+        docker-compose exec app php artisan key:generate - запускаем php artisan key:generate в сервисе app
+        docker-compose exec db bash - запускаем bash терминал в контейнере db. Выход из него - команда 'exit' 
+        docker-compose exec app php artisan migrate
+        docker run -it docker-laravel-nuxt_laravel /bin/sh - для пакетов alpine
+
+- docker image prune --all (удалить все images) или docker rmi -f $(docker images -a -q)
+- docker rm -vf $(docker ps -a -q) (удалить все контейнеры)
+- docker volume rm $(docker volume ls -q) (удалить все переменные)
+- docker system prune - удаляет все и вся (containers, volumes, images, networks, build cache)
+- docker exec -u 0 -it id_container bash - заходим в bash
+- docker images | grep udemy - команда отображает образы и показывает нам только
+  те, что начинаются на udemy
+- docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build - команда выполняет объединение двух фалов заменяю значения прод на дев
+
+
+Конфиги файлов с пояснением
+--
+
+- [docker-compose.yml](./readme/docker-compose.description.yml)
+- [laravel](./readme/laravel/Dockerfile)
+- [nuxt](./readme/nuxt/Dockerfile)
+- [nginx](./readme/nginx/nginx.conf.test)
+- [php7.3-7.4](./readme/php/Dockerfile)
+
 Заметки
 --
+- 
 - С поддоменами полная беда, пока не знаю как решить, http://project.local/api/hi http://project.local работают
-- https://github.com/nevadskiy/laravel-nuxt-docker
+- https://github.com/nevadskiy/laravel-nuxt-docker - интересный реозиторий
 - https://titanwolf.org/Network/Articles/Article?AID=a4ef5ad1-fdb4-47ca-8414-3766a6f4e224 - как еще можно организовать структуру
 - для alpine необходимо использовать apk update (вместое apt-get update) && apk add (вместо apt-get install)
-  - разница между ports и expose
+- разница между ports и expose
 
 
     Порты Этот раздел используется для определения сопоставления между хост - сервером и контейнером Docker.
@@ -46,38 +81,9 @@
     спользуя пользовательский мост, только веб-порт должен быть открыт, и приложению базы данных не нужны открытые порты, 
     так как веб-интерфейс может связаться с ним по определяемому пользователем мосту.
 
-Это распространенный случай использования при настройке сетевой архитектуры в docker. 
-Так, например, в сети моста по умолчанию порты недоступны из внешнего мира. 
-Для этого вы можете открыть входную точку с помощью "ports". 
+Это распространенный случай использования при настройке сетевой архитектуры в docker.
+Так, например, в сети моста по умолчанию порты недоступны из внешнего мира.
+Для этого вы можете открыть входную точку с помощью "ports".
 С помощью "expose" вы определяете связь внутри сети. Е
 сли вы хотите предоставить порты по умолчанию, вам не нужно определять "expose" в файле docker-compose.
 </blockquote>
-
-
-Команды
---
-
- - docker-compose up --build (сборка проекта для продакшена)
- - docker-compose logs название_контейнера (посмотреть логи запущеного контейнера)
- - docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build (запускаем режим разработки)
- - docker run --rm -v $(pwd):/app composer install (установка vendora без композера, не забыть перейти в папочку laravel)
- - docker-compose exec name_services (позволяет запускать конкретные команды в контейнерах)
-
-
-        docker-compose exec app php artisan key:generate - запускаем php artisan key:generate в сервисе app
-        docker-compose exec db bash - запускаем bash терминал в контейнере db. Выход из него - команда 'exit' 
-        docker-compose exec app php artisan migrate
-        docker run -it docker-laravel-nuxt_laravel /bin/sh - для пакетов alpine
-
-- docker image prune --all (удалить все images) или docker rmi -f $(docker images -a -q)
-- docker rm -vf $(docker ps -a -q) (удалить все контейнеры)
-- docker volume rm $(docker volume ls -q) (удалить все переменные)
-
-Конфиги файлов
---
-
-- docker-compose.yml
-
-
-    maria_db:
-        platform: linux/x86_64 - данная настройка нужна для mac c m1

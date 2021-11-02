@@ -1,0 +1,116 @@
+#версионирование docker-compose и то, какие поля можно использовать
+version: '3'
+#то какие сервисы мы создаем сервер, база, язк
+services:
+  #произвольное название сервиса
+  nuxt:
+    #какой докер файл подключать и из какой папки
+    build:
+      context: ./nuxt
+      dockerfile: Dockerfile
+    #Как будет называться контейнер, это нужно для того чтобы проще определять ид контейнера
+    container_name: dln-nuxt
+    #
+    restart: unless-stopped
+    #
+    stdin_open: true
+    #
+    tty: true
+    #
+    volumes:
+      - './nuxt:/app'
+      #так мы отслеживаем нод модулес
+      - './app/node_modules/'
+    #
+    command: [ "npm", "run", "dev" ]
+    #порты - первый говорит в каком порту выводить наружу, а второй какой порт характерен внутри докера
+    ports:
+      - '3000:3000'
+    #Переменные окружения
+    environment:
+      #по факту данная переменная PORT будет видна в сервисе в process.ENV.PORT
+      - PORT=3000
+      #
+      - CHOKIDAR_USEPOLLING=true
+
+    # в каких сетях работает данный сервис
+    networks:
+      - docker-laravel-nuxt
+
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile
+    container_name: dln-laravel
+    working_dir: /var/www/laravel
+    restart: unless-stopped
+    volumes:
+      #
+      - ./laravel:/var/www/laravel
+    #
+    depends_on:
+      #
+      - maria_db
+    networks:
+      - docker-laravel-nuxt
+
+  maria_db:
+    #
+    image: mariadb:10
+    #
+    platform: linux/x86_64
+    container_name: dln-maria-db
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    #
+    environment:
+      MYSQL_DATABASE: admin
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    #
+    volumes:
+      #
+      - ./laravel/storage/dbdata:/var/lib/mysql
+    networks:
+      - docker-laravel-nuxt
+
+  nginx:
+    image: nginx:1.20-alpine
+    container_name: dln-nginx
+    restart: unless-stopped
+    #
+    tty: true
+    #
+    depends_on:
+      - laravel
+      - maria_db
+      - nuxt
+    #
+    ports:
+      #
+      - "80:80"
+      #
+      - "443:443"
+    volumes:
+      #
+      - ./:/var/www
+      #
+      - ./nginx/nginx.conf.test:/etc/nginx/conf.d/nginx.conf
+    networks:
+      - docker-laravel-nuxt
+
+#
+networks:
+  #
+  docker-laravel-nuxt:
+    #
+    driver: bridge
+
+#
+#volumes:
+#  name_services
+#  например
+#  mongodb_api:
+#  mongodb_auth:
